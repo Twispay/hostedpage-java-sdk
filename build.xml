@@ -1,0 +1,59 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="twispay" default="default">
+    <property name="ivy.install.version" value="2.0.0"/>
+    <property name="ivy.jar.dir" value="${basedir}/library/ivy"/>
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
+    <property name="build.dir" value="build"/>
+    <property name="src.dir" value="src"/>
+    <target name="download-ivy" unless="skip.download">
+        <echo message="Installing ivy..."/>
+        <mkdir dir="${ivy.jar.dir}"/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
+        <path id="ivy.lib.path">
+            <pathelement location="${ivy.jar.file}"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+    <target name="default" description="--> default">
+        <echo message="Compile and run the sample code with [ant order] and [ant ipn]"/>
+    </target>
+    <target name="order" depends="install-ivy" description="--> resolve dependencies, compile and run twispayOrder">
+        <echo message="Using ivy to resolve json-simple 1.1.1..."/>
+        <ivy:cachepath organisation="com.googlecode.json-simple" module="json-simple" revision="1.1.1" pathid="lib.path.id" inline="true"/>
+        <echo message="Compiling..."/>
+        <mkdir dir="${build.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="lib.path.id" includeAntRuntime="false"/>
+        <echo message="Execute twispayOrder..."/>
+        <java classname="src.twispayOrder">
+            <classpath>
+                <path refid="lib.path.id"/>
+                <path location="${build.dir}"/>
+            </classpath>
+            <arg value="${jsonOrderData}"/>
+            <arg value="${secretKey}"/>
+        </java>
+    </target>
+    <target name="ipn" depends="install-ivy" description="--> resolve dependencies, compile and run twispayIpn">
+        <echo message="Using ivy to resolve json-simple 1.1.1..."/>
+        <ivy:cachepath organisation="com.googlecode.json-simple" module="json-simple" revision="1.1.1" pathid="lib.path.id" inline="true"/>
+        <echo message="Compiling..."/>
+        <mkdir dir="${build.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="lib.path.id" includeAntRuntime="false"/>
+        <echo message="Execute twispayIpn..."/>
+        <java classname="src.twispayIpn">
+            <classpath>
+                <path refid="lib.path.id"/>
+                <path location="${build.dir}"/>
+            </classpath>
+            <arg value="${encryptedIpnResponse}"/>
+            <arg value="${secretKey}"/>
+        </java>
+    </target>
+    <target name="clean" description="--> clean the project">
+        <delete includeemptydirs="true" quiet="true">
+            <fileset dir="${build.dir}"/>
+            <fileset dir="${ivy.jar.dir}"/>
+        </delete>
+    </target>
+</project>
