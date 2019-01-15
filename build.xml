@@ -3,7 +3,7 @@
     <property name="ivy.jar.dir" value="${basedir}/library/ivy"/>
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
     <property name="build.dir" value="build"/>
-    <property name="src.dir" value="src"/>
+    <property name="src.dir" value="src;example"/>
     <target name="download-ivy" unless="skip.download">
         <echo message="Installing ivy..."/>
         <mkdir dir="${ivy.jar.dir}"/>
@@ -25,13 +25,11 @@
         <mkdir dir="${build.dir}"/>
         <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="lib.path.id" includeAntRuntime="false"/>
         <echo message="Execute twispayOrder..."/>
-        <java classname="src.twispayOrder">
+        <java classname="twispayOrder">
             <classpath>
                 <path refid="lib.path.id"/>
                 <path location="${build.dir}"/>
             </classpath>
-            <arg value="${jsonOrderData}"/>
-            <arg value="${secretKey}"/>
         </java>
     </target>
     <target name="ipn" depends="install-ivy" description="--> resolve dependencies, compile and run twispayIpn">
@@ -41,13 +39,11 @@
         <mkdir dir="${build.dir}"/>
         <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="lib.path.id" includeAntRuntime="false"/>
         <echo message="Execute twispayIpn..."/>
-        <java classname="src.twispayIpn">
+        <java classname="twispayIpn">
             <classpath>
                 <path refid="lib.path.id"/>
                 <path location="${build.dir}"/>
             </classpath>
-            <arg value="${encryptedIpnResponse}"/>
-            <arg value="${secretKey}"/>
         </java>
     </target>
     <target name="clean" description="--> clean the project">

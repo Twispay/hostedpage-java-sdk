@@ -1,5 +1,3 @@
-package src;
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -9,12 +7,34 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 import javax.crypto.Mac;
 
+/**
+ * The Twispay class implements methods to get the value
+ * of `jsonRequest` and `checksum` that need to be sent by POST
+ * when making a Twispay order and to decrypt the Twispay IPN response.
+ */
 public class Twispay {
 
+    /**
+     * Get the `jsonRequest` parameter (order parameters as JSON and base64 encoded).
+     *
+     * @param JSONObject jsonOrderData The order parameters.
+     *
+     * @return String
+     */
     public static String getBase64JsonRequest(JSONObject jsonOrderData) {
         return new String(Base64.getEncoder().encode(jsonOrderData.toString().getBytes()));
     }
 
+    /**
+     * Get the `checksum` parameter (the checksum computed over the `jsonRequest` and base64 encoded).
+     *
+     * @param JSONObject jsonOrderData The order parameters.
+     * @param byte[] secretKey The secret key (from Twispay).
+     *
+     * @return String
+     *
+     * @throws RuntimeException
+     */
     public static String getBase64Checksum(JSONObject jsonOrderData, byte[] secretKey) throws RuntimeException {
         byte[] hmacSha512;
         try {
@@ -28,21 +48,16 @@ public class Twispay {
         return new String(Base64.getEncoder().encode(hmacSha512));
     }
 
-    public static String getHtmlOrderForm(JSONObject jsonOrderData, byte[] secretKey, boolean twispayLive) throws RuntimeException {
-        String base64JsonRequest = Twispay.getBase64JsonRequest(jsonOrderData);
-        String base64Checksum = Twispay.getBase64Checksum(jsonOrderData, secretKey);
-        String hostName = twispayLive ? "secure.twispay.com" : "secure-stage.twispay.com";
-        return "<form action=\"https://" + hostName + "\" method=\"post\" accept-charset=\"UTF-8\">\n"
-                + "<input type=\"hidden\" name=\"jsonRequest\" value=\"" + base64JsonRequest + "\">\n"
-                + "<input type=\"hidden\" name=\"checksum\" value=\"" + base64Checksum + "\">\n"
-                + "<input type=\"submit\" value=\"Pay\">\n"
-                + "</form>";
-    }
-
-    public static String getHtmlOrderForm(JSONObject jsonOrderData, byte[] secretKey) throws RuntimeException {
-        return getHtmlOrderForm(jsonOrderData, secretKey, false);
-    }
-
+    /**
+     * Decrypt the IPN response from Twispay.
+     *
+     * @param String encryptedIpnResponse
+     * @param byte[] secretKey The secret key (from Twispay).
+     *
+     * @return JSONObject
+     *
+     * @throws RuntimeException
+     */
     public static JSONObject decryptIpnResponse(String encryptedIpnResponse, byte[] secretKey) throws RuntimeException {
         // get the IV and the encrypted data
         String[] encryptedParts = encryptedIpnResponse.split(",", 2);

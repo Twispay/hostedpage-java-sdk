@@ -1,13 +1,17 @@
-package src;
-
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
-public class TwispaySample {
-    public static JSONObject getOrderData() {
+/**
+ * Example code for generating a HTML form to be posted to Twispay.
+ */
+public class twispayOrder {
+    public static void main(String args[]) throws ParseException {
         // sample data contains all available parameters
         // depending on order type, not all parameters are required/needed
         // you need to replace `siteId` etc. with valid data
@@ -107,18 +111,29 @@ public class TwispaySample {
         customData.put("key2", "value");
         sampleData.put("customData", customData);
 
-        // get the data as JSON text
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.putAll(sampleData);
+        // get the data as JSON
+        JSONObject jsonOrderData = new JSONObject();
+        jsonOrderData.putAll(sampleData);
 
-        return jsonObject;
-    }
+        // your secret key
+        String secretKey = "cd07b3c95dc9a0c8e9318b29bdc13b03";
 
-    public static String getEncryptedIpnResponse() {
-        return "oUrO8wW0IXK1yj9F8RYbHw==,Hrw4AkEt+DBALL4P9gNDyBxkvnjh3wxlgAdqe1jVffEGrwpEpCKc3eYjR4l+mi9dCxPuvXRceVgqd7ypn9aXGLXejxClumv4l2Ym2djbpsi2PFRWyWXHoJar+NX8aLU/yCYdHUoNtvoZRA2RI13IUCLZZ1znlQdyEL9NXQTEAxrbZe7a4vmYbUDBosAiIfApGLGMWQG/OF+ebukvLeZGajzUbhbp69k8/UD03dT8NBDMSos5XayJNnEibM2unImh6tcOek5prenHQOqkIv7TeGfC3HQDxUgXH2Rw8j+7Kyu/p72AYTCvXrJOoAVJ00KKDXTi4xu7+a5VJwP/tpdLz5jeoIfivzgxPP9I/o72OhSrdAZcxPQ5YjbyS22IXhz7G1MkHX0ItytWRqKyfXjq+58LS2ovlQu3eYhoftfBjsq3xisdjqTld9V+DL97qCcWzHo7hscMLO7/5nrXsGiSY16PZ6tUtqe9lI4ErvC+71iH+i44NijMTXMt9uX01V/4Wqlz8m5sDE4Nl0uM31eV2M1MvLKyV1tntj78WREX/mpuqclD8wWO+weglzqfyaF/";
-    }
+        System.out.println("Sample jsonOrderData: " + jsonOrderData);
+        System.out.println("Sample secretKey: " + secretKey);
 
-    public static String getSecretKey() {
-        return "cd07b3c95dc9a0c8e9318b29bdc13b03";
+        // TRUE for Twispay live site, otherwise Twispay stage will be used
+        boolean twispayLive = false;
+
+        // get the HTML form
+        String base64JsonRequest = Twispay.getBase64JsonRequest(jsonOrderData);
+        String base64Checksum = Twispay.getBase64Checksum(jsonOrderData, secretKey.getBytes(StandardCharsets.UTF_8));
+        String hostName = twispayLive ? "secure.twispay.com" : "secure-stage.twispay.com";
+        String htmlForm = "<form action=\"https://" + hostName + "\" method=\"post\" accept-charset=\"UTF-8\">\n"
+                + "<input type=\"hidden\" name=\"jsonRequest\" value=\"" + base64JsonRequest + "\">\n"
+                + "<input type=\"hidden\" name=\"checksum\" value=\"" + base64Checksum + "\">\n"
+                + "<input type=\"submit\" value=\"Pay\">\n"
+                + "</form>";
+
+        System.out.println("Generated HTML form: " + htmlForm);
     }
 }
