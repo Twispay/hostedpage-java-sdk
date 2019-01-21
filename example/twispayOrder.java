@@ -19,7 +19,7 @@ public class twispayOrder {
         sampleData.put("siteId", 1);
 
         HashMap<String, Object> customerData = new HashMap<>();
-        customerData.put("identifier", "identifier");
+        customerData.put("identifier", "external-user-id");
         customerData.put("firstName", "John");
         customerData.put("lastName", "Doe");
         customerData.put("country", "US");
