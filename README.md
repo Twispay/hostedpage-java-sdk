@@ -8,7 +8,7 @@ HashMap<String, Object> sampleData = new HashMap<>();
 sampleData.put("siteId", 1);
 
 HashMap<String, Object> customerData = new HashMap<>();
-customerData.put("identifier", "identifier");
+customerData.put("identifier", "external-user-id");
 customerData.put("firstName", "John");
 customerData.put("lastName", "Doe");
 customerData.put("country", "US");
@@ -23,19 +23,14 @@ sampleData.put("customer", customerData);
 
 HashMap<String, Object> orderData = new HashMap<>();
 orderData.put("orderId", "external-order-id");
-orderData.put("type", "recurring");
+orderData.put("type", "purchase");
 orderData.put("amount", 2194.99);
 orderData.put("currency", "USD");
-orderData.put("description", ""1 year subscription on site"");
-orderData.put("intervalType", "month");
-orderData.put("intervalValue", 1);
-orderData.put("trialAmount", 1);
-orderData.put("firstBillDate", "2020-10-02T12:00:00+00:00");
+orderData.put("description", "1 year subscription on site");
 
 sampleData.put("order", orderData);
 
 sampleData.put("cardTransactionMode", "authAndCapture");
-sampleData.put("cardId", 1);
 sampleData.put("invoiceEmail", "john.doe@test.com");
 sampleData.put("backUrl", "http://google.com");
 
