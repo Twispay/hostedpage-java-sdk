@@ -15,35 +15,39 @@ public class twispayOrder {
         // sample data contains all available parameters
         // depending on order type, not all parameters are required/needed
         // you need to replace `siteId` etc. with valid data
+        // do not send empty values for optional parameters
         HashMap<String, Object> sampleData = new HashMap<>();
-        sampleData.put("siteId", 1);
+        sampleData.put("siteId", 1); // mandatory
 
         HashMap<String, Object> customerData = new HashMap<>();
         customerData.put("identifier", "external-user-id");
-        customerData.put("firstName", "John");
-        customerData.put("lastName", "Doe");
-        customerData.put("country", "US");
+        customerData.put("firstName", "John"); // conditional (if required by the bank/mid)
+        customerData.put("lastName", "Doe"); // conditional (if required by the bank/mid)
+        customerData.put("country", "US"); // conditional (if required by the bank/mid)
         customerData.put("state", "NY");
-        customerData.put("city", "New York");
-        customerData.put("address", "1st Street");
-        customerData.put("zipCode", "11222");
-        customerData.put("phone", "0012120000000");
-        customerData.put("email", "john.doe@test.com");
+        customerData.put("city", "New York"); // conditional (if required by the bank/mid)
+        customerData.put("address", "1st Street"); // conditional (if required by the bank/mid)
+        customerData.put("zipCode", "11222"); // conditional (if required by the bank/mid)
+        customerData.put("phone", "0012120000000"); // conditional (if required by the bank/mid)
+        customerData.put("email", "john.doe@test.com"); // mandatory
 
         List<String> customerTags = new ArrayList<>();
         customerTags.add("customer_tag_1");
         customerTags.add("customer_tag_2");
         customerData.put("tags", customerTags);
 
-        sampleData.put("customer", customerData);
+        sampleData.put("customer", customerData); // mandatory
 
         HashMap<String, Object> orderData = new HashMap<>();
-        orderData.put("orderId", "external-order-id");
-        orderData.put("type", "recurring");
-        orderData.put("amount", 2194.99);
-        orderData.put("currency", "USD");
+        orderData.put("orderId", "external-order-id"); // mandatory
+        orderData.put("type", "recurring"); // mandatory; one of: purchase, recurring, managed
+        orderData.put("amount", 2194.99); // mandatory
+        orderData.put("currency", "USD"); // mandatory
 
-        List<HashMap> itemsList = new ArrayList<>();
+        // use description or items; for airlines or tourism the items is mandatory
+        orderData.put("description", "product or service description");
+
+        List<HashMap> itemsList = new ArrayList<>(); // an array of item object; add any number of items on the cart
 
         HashMap<String, Object> itemData = new HashMap<>();
         itemData.put("item", "1 year subscription on site");
@@ -82,34 +86,48 @@ public class twispayOrder {
         orderTags.add("tag_2");
         orderData.put("tags", orderTags);
 
-        orderData.put("intervalType", "month");
-        orderData.put("intervalValue", 1);
-        orderData.put("trialAmount", 1);
-        orderData.put("firstBillDate", "2020-10-02T12:00:00+00:00");
+        orderData.put("intervalType", "month"); // conditional (if order.type = recurring)
+        orderData.put("intervalValue", 1); // conditional (if order.type = recurring)
+        orderData.put("trialAmount", 1); // conditional (if order.type = recurring and you want smaller payment for trial)
+        orderData.put("firstBillDate", "2020-10-02T12:00:00+00:00"); // conditional (if order.type = recurring)
+
+        // next fields are mandatory if your business is airlines or tourism
+        // send one of level3Airline, level3Tourism objects along with level3Type to match what you send
+        orderData.put("level3Type", "airline");
 
         HashMap<String, Object> level3Airline = new HashMap<>();
-        orderData.put("ticketNumber", "8V32EU");
-        orderData.put("passengerName", "John Doe");
-        orderData.put("flightNumber", "SQ619");
-        orderData.put("departureDate", "2020-02-05T14:13:00+02:00");
-        orderData.put("departureAirportCode", "KIX");
-        orderData.put("arrivalAirportCode", "OTP");
-        orderData.put("carrierCode", "American Airlines");
-        orderData.put("travelAgencyCode", "19NOV05");
-        orderData.put("travelAgencyName", "Elite Travel");
+        level3Airline.put("ticketNumber", "8V32EU");
+        level3Airline.put("passengerName", "John Doe");
+        level3Airline.put("flightNumber", "SQ619");
+        level3Airline.put("departureDate", "2020-02-05T14:13:00+02:00");
+        level3Airline.put("departureAirportCode", "KIX");
+        level3Airline.put("arrivalAirportCode", "OTP");
+        level3Airline.put("carrierCode", "American Airlines");
+        level3Airline.put("travelAgencyCode", "19NOV05");
+        level3Airline.put("travelAgencyName", "Elite Travel");
         orderData.put("level3Airline", level3Airline);
+
+        HashMap<String, Object> level3Tourism = new HashMap<>();
+        level3Tourism.put("tourNumber", "8V32EU");
+        level3Tourism.put("travellerName", "John Doe");
+        level3Tourism.put("flightNumber", "SQ619");
+        level3Tourism.put("departureDate", "2020-02-05T14:13:00+02:00");
+        level3Tourism.put("returnDate", "2020-02-06T14:13:00+02:00");
+        level3Tourism.put("travelAgencyCode", "19NOV05");
+        level3Tourism.put("travelAgencyName", "Elite Travel");
+        orderData.put("level3Tourism", level3Tourism);
 
         sampleData.put("order", orderData);
 
-        sampleData.put("cardTransactionMode", "authAndCapture");
-        sampleData.put("cardId", 1);
-        sampleData.put("invoiceEmail", "john.doe@test.com");
-        sampleData.put("backUrl", "http://google.com");
+        sampleData.put("cardTransactionMode", "authAndCapture"); // mandatory; one of: auth, authAndCapture
+        sampleData.put("cardId", 1); // optional; use it if you want to suggest customer to use one of his previous saved cards
+        sampleData.put("invoiceEmail", "john.doe@test.com"); // optional; if you need different email address than of the customer's where he will receive the payment confirmation
+        sampleData.put("backUrl", "http://google.com"); // optional
 
         HashMap<String, String> customData = new HashMap<>();
         customData.put("key1", "value");
         customData.put("key2", "value");
-        sampleData.put("customData", customData);
+        sampleData.put("customData", customData); // optional; any number of custom fields that you want to pass to twispay and get back on the transaction response
 
         // get the data as JSON
         JSONObject jsonOrderData = new JSONObject();
@@ -124,7 +142,7 @@ public class twispayOrder {
         // TRUE for Twispay live site, otherwise Twispay stage will be used
         boolean twispayLive = false;
 
-        // get the HTML form
+        // use base64JsonRequest and base64Checksum to generate a form
         String base64JsonRequest = Twispay.getBase64JsonRequest(jsonOrderData);
         String base64Checksum = Twispay.getBase64Checksum(jsonOrderData, secretKey.getBytes(StandardCharsets.UTF_8));
         String hostName = twispayLive ? "secure.twispay.com" : "secure-stage.twispay.com";
